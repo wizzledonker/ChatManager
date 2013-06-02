@@ -18,11 +18,14 @@
  */
 package ru.tehkode.chatmanager.bukkit;
 
+import java.io.File;
 import java.util.logging.Logger;
+import net.milkbowl.vault.chat.Chat;
+import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 /**
  *
@@ -31,36 +34,24 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
 public class ChatManager extends JavaPlugin {
 
     protected static Logger log;
+    public Permission permission = null;
+    public Chat chat = null;
     protected ChatListener listener;
 
     @Override
     public void onEnable() {
     	log = this.getLogger();
-    	
-        // At first check PEX existence
-        try {
-            PermissionsEx.getPermissionManager();
-        } catch (Throwable e) {
-            log.severe("PermissionsEx not found, disabling");
-            this.getPluginLoader().disablePlugin(this);
-            return;
-        }
 
         FileConfiguration config = this.getConfig();
+        
+        this.initializeConfiguration(config);
+        this.listener = new ChatListener(config, this);
 
-        if (config.get("enable") == null) { // Migrate
-            this.initializeConfiguration(config);
-        }
-
-        this.listener = new ChatListener(config);
-
-        if (config.getBoolean("enable", false)) {
+        if (config.getBoolean("enable", false) && setupPermissions() && setupChat()) {
             this.getServer().getPluginManager().registerEvents(listener, this);
-            log.info("ChatManager enabled!");
-            // Make sure MV didn't load before we did.
-            this.listener.checkForMultiverse(this.getServer().getPluginManager().getPlugin("Multiverse-Core"));
+            log.info("ChatManager enabled! (Custom for oblicom)");
         } else {
-        	log.info("ChatManager disabled. Check config.yml!");
+            log.info("ChatManager disabled. Check config.yml!");
             this.getPluginLoader().disablePlugin(this);
         }
 
@@ -73,21 +64,36 @@ public class ChatManager extends JavaPlugin {
         
         log.info("ChatManager disabled!");
     }
+    
+    private boolean setupPermissions()
+    {
+        RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
+        if (permissionProvider != null) {
+            permission = permissionProvider.getProvider();
+        }
+        return (permission != null);
+    }
+    
+    private boolean setupChat()
+    {
+        RegisteredServiceProvider<Chat> chatProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.chat.Chat.class);
+        if (chatProvider != null) {
+            chat = chatProvider.getProvider();
+        }
+
+        return (chat != null);
+    }
 
     protected void initializeConfiguration(FileConfiguration config) {
-        // At migrate and setup defaults
-        PermissionsEx pex = (PermissionsEx) this.getServer().getPluginManager().getPlugin("PermissionsEx");
-
-        FileConfiguration pexConfig = pex.getConfig();
-
         // Flags
-        config.set("enable", pexConfig.getBoolean("permissions.chat.enable", false));
-        config.set("message-format", pexConfig.getString("permissions.chat.format", ChatListener.MESSAGE_FORMAT));
-        config.set("global-message-format", pexConfig.getString("permissions.chat.global-format", ChatListener.GLOBAL_MESSAGE_FORMAT));
-        config.set("ranged-mode", pexConfig.getBoolean("permissions.chat.force-ranged", ChatListener.RANGED_MODE));
-        config.set("chat-range", pexConfig.getDouble("permissions.chat.chat-range", ChatListener.CHAT_RANGE));
+        if (!new File(this.getDataFolder(), "config.yml").exists()) {
+            config.set("enable", true);
+            config.set("message-format", ChatListener.MESSAGE_FORMAT);
+            config.set("display-name-format", "%prefix%player%suffix");
+        }
+
         
-        pex.saveConfig();
+        saveConfig();
     }
 
 }
