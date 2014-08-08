@@ -1,7 +1,6 @@
 name: ChatManager
 main: ru.tehkode.chatmanager.bukkit.ChatManager
-depend: [ PermissionsEx ]
-version: 1.19.1
+version: 2.1
 author: t3hk0d3
 website: www.bukkit.org
-description: Chat management plugin for PermissionsEx
+description: Basic Chat management plugin for Vault

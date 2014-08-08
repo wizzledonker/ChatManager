@@ -93,12 +93,36 @@ public class ChatListener implements Listener {
 
 	protected String replacePlayerPlaceholders(Player player, String format) {
 		String worldName = player.getWorld().getName();
-		return format.replace("%prefix", this.translateColorCodes(plugin.chat.getPlayerPrefix(player)))
-                        .replace("%suffix", this.translateColorCodes(plugin.chat.getPlayerSuffix(player)))
+		return format.replace("%prefix", this.translateColorCodes(determinePrefix(player)))
+                        .replace("%suffix", this.translateColorCodes(determineSuffix(player)))
                         .replace("%world", worldName)
                         .replace("%player", player.getDisplayName())
                         .replace("%group", plugin.permission.getPrimaryGroup(player));
 	}
+        
+        private String determinePrefix(Player player) {
+            String finalPrefix = "";
+            
+            if (plugin.chat.getPlayerPrefix(player) != "") {
+                finalPrefix = plugin.chat.getPlayerPrefix(player);
+            } else {
+                finalPrefix = plugin.chat.getGroupPrefix(player.getWorld(), plugin.permission.getPrimaryGroup(player));
+            }
+            
+            return finalPrefix;
+        }
+        
+        private String determineSuffix(Player player) {
+            String finalSuffix = "";
+
+            if (plugin.chat.getPlayerSuffix(player) != "") {
+                finalSuffix = plugin.chat.getPlayerSuffix(player);
+            } else {
+                finalSuffix = plugin.chat.getGroupSuffix(player.getWorld(), plugin.permission.getPrimaryGroup(player));
+            }
+            
+            return finalSuffix;
+        }
 
 	protected String replaceTime(String message) {
 		Calendar calendar = Calendar.getInstance();
