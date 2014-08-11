@@ -20,7 +20,6 @@ package ru.tehkode.chatmanager.bukkit;
 
 import java.io.File;
 import java.util.logging.Logger;
-import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.configuration.file.FileConfiguration;
@@ -35,8 +34,9 @@ public class ChatManager extends JavaPlugin {
 
     protected static Logger log;
     public Permission permission = null;
-    public Chat chat = null;
     protected ChatListener listener;
+    
+    public ChatManagerConfiguration chat = new ChatManagerConfiguration(this);
 
     @Override
     public void onEnable() {
@@ -47,7 +47,7 @@ public class ChatManager extends JavaPlugin {
         this.initializeConfiguration(config);
         this.listener = new ChatListener(config, this);
 
-        if (config.getBoolean("enable", false) && setupPermissions() && setupChat()) {
+        if (config.getBoolean("enable", false) && setupPermissions()) {
             this.getServer().getPluginManager().registerEvents(listener, this);
             log.info("ChatManager enabled! (Custom for oblicom)");
         } else {
@@ -73,16 +73,6 @@ public class ChatManager extends JavaPlugin {
         }
         return (permission != null);
     }
-    
-    private boolean setupChat()
-    {
-        RegisteredServiceProvider<Chat> chatProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.chat.Chat.class);
-        if (chatProvider != null) {
-            chat = chatProvider.getProvider();
-        }
-
-        return (chat != null);
-    }
 
     protected void initializeConfiguration(FileConfiguration config) {
         // Flags
@@ -94,6 +84,10 @@ public class ChatManager extends JavaPlugin {
 
         
         saveConfig();
+    }
+
+    void log(String string) {
+        System.out.println("[" + this.getName() + "] " + string);
     }
 
 }

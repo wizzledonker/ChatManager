@@ -106,7 +106,7 @@ public class ChatListener implements Listener {
             if (plugin.chat.getPlayerPrefix(player) != "") {
                 finalPrefix = plugin.chat.getPlayerPrefix(player);
             } else {
-                finalPrefix = plugin.chat.getGroupPrefix(player.getWorld(), plugin.permission.getPrimaryGroup(player));
+                finalPrefix = plugin.chat.getGroupPrefix(plugin.permission.getPrimaryGroup(player));
             }
             
             return finalPrefix;
@@ -118,7 +118,7 @@ public class ChatListener implements Listener {
             if (plugin.chat.getPlayerSuffix(player) != "") {
                 finalSuffix = plugin.chat.getPlayerSuffix(player);
             } else {
-                finalSuffix = plugin.chat.getGroupSuffix(player.getWorld(), plugin.permission.getPrimaryGroup(player));
+                finalSuffix = plugin.chat.getGroupSuffix(plugin.permission.getPrimaryGroup(player));
             }
             
             return finalSuffix;
