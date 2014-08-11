@@ -20,10 +20,13 @@ package ru.tehkode.chatmanager.bukkit;
 
 import java.io.File;
 import java.util.logging.Logger;
+import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -47,7 +50,7 @@ public class ChatManager extends JavaPlugin {
         this.initializeConfiguration(config);
         this.listener = new ChatListener(config, this);
 
-        if (config.getBoolean("enable", false) && setupPermissions()) {
+        if (config.getBoolean("enable", false) && setupPermissions() && setupChatHandler()) {
             this.getServer().getPluginManager().registerEvents(listener, this);
             log.info("ChatManager enabled! (Custom for oblicom)");
         } else {
@@ -84,6 +87,15 @@ public class ChatManager extends JavaPlugin {
 
         
         saveConfig();
+    }
+    
+    private boolean setupChatHandler() {
+        Plugin vault = getServer().getPluginManager().getPlugin("Vault");
+        if (vault == null) {
+            return false;
+        }
+        getServer().getServicesManager().register(Chat.class, new VaultHandler(this, this.permission), this, ServicePriority.Highest);
+        return true;
     }
 
     void log(String string) {
