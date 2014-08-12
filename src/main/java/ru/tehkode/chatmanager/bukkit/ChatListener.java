@@ -43,12 +43,14 @@ public class ChatListener implements Listener {
 	public final static String MESSAGE_FORMAT = "<%prefix%player%suffix> %message";
 	protected String messageFormat = MESSAGE_FORMAT;
 	protected String displayNameFormat = "%prefix%player%suffix";
+        protected String defaultGroup = "hobo";
         
         private ChatManager plugin = null;
 
 	public ChatListener(FileConfiguration config, ChatManager plugin) {
 		this.messageFormat = config.getString("message-format", this.messageFormat);
 		this.displayNameFormat = config.getString("display-name-format", this.displayNameFormat);
+                this.defaultGroup = config.getString("default_class", this.defaultGroup);
                 
                 this.plugin = plugin;
 	}
@@ -72,6 +74,7 @@ public class ChatListener implements Listener {
 		chatMessage = this.translateColorCodes(chatMessage, worldName);
 
 		message = message.replace("%message", "%2$s").replace("%displayname", "%1$s");
+                System.out.println(message);
 		message = this.replacePlayerPlaceholders(player, message);
 		message = this.replaceTime(message);
 
@@ -93,11 +96,23 @@ public class ChatListener implements Listener {
 
 	protected String replacePlayerPlaceholders(Player player, String format) {
 		String worldName = player.getWorld().getName();
-		return format.replace("%prefix", this.translateColorCodes(determinePrefix(player)))
-                        .replace("%suffix", this.translateColorCodes(determineSuffix(player)))
-                        .replace("%world", worldName)
-                        .replace("%player", player.getDisplayName())
-                        .replace("%group", plugin.permission.getPrimaryGroup(player));
+                String formatted = format.replace("%prefix", this.translateColorCodes(determinePrefix(player)));
+                
+                formatted = formatted.replace("%suffix", this.translateColorCodes(determineSuffix(player)));
+                formatted = formatted.replace("%world", worldName);
+                formatted = formatted.replace("%player", player.getDisplayName());
+                
+                String group = plugin.permission.getPrimaryGroup(worldName, player.getUniqueId().toString());
+                
+                if (group != null) {
+                    formatted = formatted.replace("%group", group);
+                } else {
+                    formatted = formatted.replace("%group", this.defaultGroup);
+                }
+                
+                System.out.println(formatted);
+                
+		return formatted;
 	}
         
         private String determinePrefix(Player player) {
@@ -106,7 +121,7 @@ public class ChatListener implements Listener {
             if (plugin.chat.getPlayerPrefix(player) != "") {
                 finalPrefix = plugin.chat.getPlayerPrefix(player);
             } else {
-                finalPrefix = plugin.chat.getGroupPrefix(plugin.permission.getPrimaryGroup(player));
+                finalPrefix = plugin.chat.getGroupPrefix(plugin.permission.getPrimaryGroup("world", player.getUniqueId().toString()));
             }
             
             return finalPrefix;
@@ -118,7 +133,7 @@ public class ChatListener implements Listener {
             if (plugin.chat.getPlayerSuffix(player) != "") {
                 finalSuffix = plugin.chat.getPlayerSuffix(player);
             } else {
-                finalSuffix = plugin.chat.getGroupSuffix(plugin.permission.getPrimaryGroup(player));
+                finalSuffix = plugin.chat.getGroupSuffix(plugin.permission.getPrimaryGroup("world", player.getUniqueId().toString()));
             }
             
             return finalSuffix;

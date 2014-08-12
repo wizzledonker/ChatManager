@@ -83,6 +83,7 @@ public class ChatManager extends JavaPlugin {
             config.set("enable", true);
             config.set("message-format", ChatListener.MESSAGE_FORMAT);
             config.set("display-name-format", "%prefix%player%suffix");
+            config.set("default_class", "hobo");
         }
 
         
