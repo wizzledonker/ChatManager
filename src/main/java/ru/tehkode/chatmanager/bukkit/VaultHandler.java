@@ -6,6 +6,7 @@ package ru.tehkode.chatmanager.bukkit;
 
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
+import org.bukkit.entity.Player;
 
 /**
  *
@@ -42,6 +43,11 @@ public class VaultHandler extends Chat {
     @Override
     public void setPlayerPrefix(String string, String string1, String string2) {
         plugin.chat.setPlayerPrefix(plugin.getServer().getPlayer(string1), string2);
+    }
+    
+    @Override
+    public void setPlayerPrefix(Player player, String string1) {
+        plugin.chat.setPlayerPrefix(player, string1);
     }
 
     @Override

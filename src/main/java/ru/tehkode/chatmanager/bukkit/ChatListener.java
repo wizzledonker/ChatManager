@@ -74,7 +74,6 @@ public class ChatListener implements Listener {
 		chatMessage = this.translateColorCodes(chatMessage, worldName);
 
 		message = message.replace("%message", "%2$s").replace("%displayname", "%1$s");
-                System.out.println(message);
 		message = this.replacePlayerPlaceholders(player, message);
 		message = this.replaceTime(message);
 
@@ -110,7 +109,6 @@ public class ChatListener implements Listener {
                     formatted = formatted.replace("%group", this.defaultGroup);
                 }
                 
-                System.out.println(formatted);
                 
 		return formatted;
 	}
@@ -121,7 +119,7 @@ public class ChatListener implements Listener {
             if (plugin.chat.getPlayerPrefix(player) != "") {
                 finalPrefix = plugin.chat.getPlayerPrefix(player);
             } else {
-                finalPrefix = plugin.chat.getGroupPrefix(plugin.permission.getPrimaryGroup("world", player.getUniqueId().toString()));
+                finalPrefix = plugin.chat.getGroupPrefix(plugin.permission.getPrimaryGroup(player.getWorld().getName(), player.getUniqueId().toString()));
             }
             
             return finalPrefix;
@@ -133,7 +131,7 @@ public class ChatListener implements Listener {
             if (plugin.chat.getPlayerSuffix(player) != "") {
                 finalSuffix = plugin.chat.getPlayerSuffix(player);
             } else {
-                finalSuffix = plugin.chat.getGroupSuffix(plugin.permission.getPrimaryGroup("world", player.getUniqueId().toString()));
+                finalSuffix = plugin.chat.getGroupSuffix(plugin.permission.getPrimaryGroup(player.getWorld().getName(), player.getUniqueId().toString()));
             }
             
             return finalSuffix;
