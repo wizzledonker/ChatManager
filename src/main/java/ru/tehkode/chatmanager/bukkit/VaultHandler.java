@@ -39,6 +39,11 @@ public class VaultHandler extends Chat {
     public String getPlayerPrefix(String string, String string1) {
         return plugin.chat.getPlayerPrefix(plugin.getServer().getPlayer(string1));
     }
+    
+    @Override
+    public String getPlayerPrefix(Player player) {
+        return plugin.chat.getPlayerPrefix(player);
+    }
 
     @Override
     public void setPlayerPrefix(String string, String string1, String string2) {

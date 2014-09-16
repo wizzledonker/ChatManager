@@ -19,6 +19,7 @@
 package ru.tehkode.chatmanager.bukkit;
 
 import java.util.Calendar;
+import java.util.Map;
 import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -44,6 +45,7 @@ public class ChatListener implements Listener {
 	protected String messageFormat = MESSAGE_FORMAT;
 	protected String displayNameFormat = "%prefix%player%suffix";
         protected String defaultGroup = "hobo";
+        protected Map swearWords;
         
         private ChatManager plugin = null;
 
@@ -51,6 +53,7 @@ public class ChatListener implements Listener {
 		this.messageFormat = config.getString("message-format", this.messageFormat);
 		this.displayNameFormat = config.getString("display-name-format", this.displayNameFormat);
                 this.defaultGroup = config.getString("default_class", this.defaultGroup);
+                this.swearWords = config.getConfigurationSection("swear_words").getValues(true);
                 
                 this.plugin = plugin;
 	}
@@ -68,12 +71,19 @@ public class ChatListener implements Listener {
 		String message = messageFormat;
                 
 		String chatMessage = event.getMessage();
-
-		message = this.translateColorCodes(message);
+                
+                for (Object word : this.swearWords.keySet()) {
+                    if (chatMessage.toLowerCase().contains(((String) word).toLowerCase())) {
+                        chatMessage = this.replaceAll((String) word, (String) swearWords.get(word), chatMessage, true);
+                    }
+                }
+                
+                message = this.translateColorCodes(message);
 
 		chatMessage = this.translateColorCodes(chatMessage, worldName);
-
-		message = message.replace("%message", "%2$s").replace("%displayname", "%1$s");
+                
+                message = message.replace("%message", "%2$s").replace("%displayname", "%1$s");
+                
 		message = this.replacePlayerPlaceholders(player, message);
 		message = this.replaceTime(message);
 
@@ -206,4 +216,44 @@ public class ChatListener implements Listener {
 		newstring = chatResetPattern.matcher(newstring).replaceAll("\u00A7$1");
 		return newstring;
 	}
+        
+        public String replaceAll(String findtxt, String replacetxt, String str, boolean isCaseInsensitive) {
+            if (str == null) {
+                return null;
+            }
+            if (findtxt == null || findtxt.length() == 0) {
+                return str;
+            }
+            if (findtxt.length() > str.length()) {
+                return str;
+            }
+            int counter = 0;
+            String thesubstr = "";
+            while ((counter < str.length()) 
+                    && (str.substring(counter).length() >= findtxt.length())) {
+                thesubstr = str.substring(counter, counter + findtxt.length());
+                if (isCaseInsensitive) {
+                    if (thesubstr.equalsIgnoreCase(findtxt)) {
+                        str = str.substring(0, counter) + replacetxt 
+                            + str.substring(counter + findtxt.length());
+                        // Failing to increment counter by replacetxt.length() leaves you open
+                        // to an infinite-replacement loop scenario: Go to replace "a" with "aa" but
+                        // increment counter by only 1 and you'll be replacing 'a's forever.
+                        counter += replacetxt.length();
+                    } else {
+                        counter++; // No match so move on to the next character from
+                                   // which to check for a findtxt string match.
+                    }
+                } else {
+                    if (thesubstr.equals(findtxt)) {
+                        str = str.substring(0, counter) + replacetxt 
+                            + str.substring(counter + findtxt.length());
+                        counter += replacetxt.length();
+                    } else {
+                        counter++;
+                    }
+                }
+            }
+            return str;
+        }
 }

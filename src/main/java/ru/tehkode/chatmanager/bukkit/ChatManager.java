@@ -19,6 +19,8 @@
 package ru.tehkode.chatmanager.bukkit;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
@@ -83,6 +85,14 @@ public class ChatManager extends JavaPlugin {
             config.set("enable", true);
             config.set("message-format", ChatListener.MESSAGE_FORMAT);
             config.set("display-name-format", "%prefix%player%suffix");
+            
+            //A list of swearwords and what to replace them with
+            Map<String, String> replacements = new HashMap<String, String>();
+            replacements.put("fuck", "frick");
+            replacements.put("shit", "faeces");
+            replacements.put("cunt", "hole");
+            
+            config.set("swear_words", replacements);
             config.set("default_class", "hobo");
         }
 
